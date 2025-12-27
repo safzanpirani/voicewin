@@ -42,9 +42,11 @@ public class TextPasteService
         if (string.IsNullOrEmpty(text))
             return;
 
+        var textWithSpace = text.TrimEnd() + " ";
+
         Thread thread = new(() =>
         {
-            SetClipboardText(text);
+            SetClipboardText(textWithSpace);
             Thread.Sleep(30);
             _inputSimulator.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_V);
         });

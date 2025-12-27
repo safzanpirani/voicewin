@@ -3,6 +3,18 @@ using NAudio.Wave;
 
 namespace VoiceWin.Services;
 
+public class AudioChunkEventArgs : EventArgs
+{
+    public byte[] Buffer { get; }
+    public int BytesRecorded { get; }
+
+    public AudioChunkEventArgs(byte[] buffer, int bytesRecorded)
+    {
+        Buffer = buffer;
+        BytesRecorded = bytesRecorded;
+    }
+}
+
 public class AudioRecordingService : IDisposable
 {
     private WaveInEvent? _waveIn;
@@ -11,9 +23,11 @@ public class AudioRecordingService : IDisposable
     private bool _isRecording;
 
     public bool IsRecording => _isRecording;
+    public WaveFormat? WaveFormat => _waveIn?.WaveFormat;
 
     public event EventHandler? RecordingStarted;
     public event EventHandler? RecordingStopped;
+    public event EventHandler<AudioChunkEventArgs>? AudioChunkAvailable;
 
     public void StartRecording()
     {
@@ -64,6 +78,10 @@ public class AudioRecordingService : IDisposable
     private void OnDataAvailable(object? sender, WaveInEventArgs e)
     {
         _waveWriter?.Write(e.Buffer, 0, e.BytesRecorded);
+        
+        var bufferCopy = new byte[e.BytesRecorded];
+        Array.Copy(e.Buffer, bufferCopy, e.BytesRecorded);
+        AudioChunkAvailable?.Invoke(this, new AudioChunkEventArgs(bufferCopy, e.BytesRecorded));
     }
 
     private void OnRecordingStopped(object? sender, StoppedEventArgs e)

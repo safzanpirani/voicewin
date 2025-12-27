@@ -85,6 +85,7 @@
                 <ComboBox x:Name="ProviderCombo" Margin="0,0,0,16">
                     <ComboBoxItem Content="Groq (whisper-large-v3-turbo)" Tag="groq"/>
                     <ComboBoxItem Content="Deepgram (nova-3)" Tag="deepgram"/>
+                    <ComboBoxItem Content="Deepgram Streaming (nova-3)" Tag="deepgram-streaming"/>
                 </ComboBox>
 
                 <TextBlock Text="Hotkey Mode" 
