@@ -52,14 +52,14 @@ Download `VoiceWin.exe` from [Releases](https://github.com/safzanpirani/voicewin
 
 ## Transcription Providers
 
-### Batch Mode (Groq, Deepgram)
+### Non-Streaming (Groq, Deepgram)
 Records audio, then transcribes after you stop. Fast and reliable.
 
 ### Streaming Mode (Deepgram Streaming)
 Transcribes in real-time as you speak - text appears immediately. Best used with **Toggle** hotkey mode.
 
 > **Note:** Streaming mode adds a trailing space after each transcript chunk to separate words. Some applications (especially terminals, code editors, and certain text fields) may strip trailing whitespace from clipboard paste. If words are running together, try:
-> - Using **Batch Mode** instead (more reliable for these apps)
+> - Using **non-streaming mode** instead (more reliable for these apps)
 > - Adjusting your terminal/editor settings to preserve trailing spaces
 > - Using a different target application
 
