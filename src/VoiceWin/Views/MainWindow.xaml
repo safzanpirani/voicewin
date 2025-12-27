@@ -19,7 +19,7 @@
 
     <Grid>
         <tb:TaskbarIcon x:Name="TaskbarIcon"
-                        IconSource="/Assets/icon.ico"
+                        IconSource="/Assets/vwtrans-crop.ico"
                         ToolTipText="VoiceWin - Ready"
                         ContextMenu="{StaticResource TrayMenu}"
                         TrayMouseDoubleClick="TaskbarIcon_TrayMouseDoubleClick"/>

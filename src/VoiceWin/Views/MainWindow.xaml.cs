@@ -1,20 +1,25 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using VoiceWin.Services;
 
 namespace VoiceWin.Views;
 
 public partial class MainWindow : Window
 {
     private readonly App _app;
+    private readonly TrayIconService _trayIconService;
 
     public MainWindow()
     {
         InitializeComponent();
         _app = (App)Application.Current;
+        _trayIconService = new TrayIconService();
 
         LoadSettings();
         SubscribeToEvents();
+
+        TaskbarIcon.IconSource = _trayIconService.CreateIconWithStatus(TrayStatus.Ready);
     }
 
     private void LoadSettings()
@@ -59,6 +64,7 @@ public partial class MainWindow : Window
                 StatusText.Text = "Recording...";
                 StatusIndicator.Fill = new SolidColorBrush(Color.FromRgb(239, 68, 68));
                 TaskbarIcon.ToolTipText = "VoiceWin - Recording...";
+                TaskbarIcon.IconSource = _trayIconService.CreateIconWithStatus(TrayStatus.Recording);
             });
         };
 
@@ -68,6 +74,7 @@ public partial class MainWindow : Window
             {
                 StatusText.Text = "Processing...";
                 StatusIndicator.Fill = new SolidColorBrush(Color.FromRgb(234, 179, 8));
+                TaskbarIcon.IconSource = _trayIconService.CreateIconWithStatus(TrayStatus.Processing);
             });
         };
 
@@ -78,6 +85,7 @@ public partial class MainWindow : Window
                 StatusText.Text = status;
                 StatusIndicator.Fill = new SolidColorBrush(Color.FromRgb(34, 197, 94));
                 TaskbarIcon.ToolTipText = $"VoiceWin - {status}";
+                TaskbarIcon.IconSource = _trayIconService.CreateIconWithStatus(TrayStatus.Ready);
             });
         };
 
