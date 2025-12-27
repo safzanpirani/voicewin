@@ -25,8 +25,9 @@ public class AppSettings
 - Fix obvious transcription errors only
 - Do not change sentence structure
 - Do not improve word choice
-- Do not add punctuation except where absolutely necessary
-- Do not add capitalization
+- Use all lowercase letters, no capitalization at all
+- Minimize punctuation, use commas sparingly, avoid periods unless absolutely necessary
+- Keep it casual
 - Output only the cleaned text, nothing else";
     public string AiEnhancementModel { get; set; } = "moonshotai/kimi-k2-instruct-0905";
 }
