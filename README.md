@@ -6,6 +6,8 @@ Native Windows Speech-to-Text Transcription App
 
 - **Hold Right Alt** to record, release to transcribe and paste
 - **Tap Right Alt** to toggle recording (configurable)
+- **Hybrid mode** - hold for quick recordings, tap to toggle for longer ones
+- **AI Enhancement** - polish transcriptions with LLM-powered rewriting
 - Supports **Groq Whisper API** (fast, free tier available)
 - Supports **Deepgram nova-3** (high quality)
 - System tray app - runs in background
@@ -14,22 +16,25 @@ Native Windows Speech-to-Text Transcription App
 ## Requirements
 
 - Windows 10/11
-- .NET 8.0 SDK
+- .NET 8.0 SDK (for building only)
 
-## Setup
+## Quick Start (Pre-built)
+
+Download `VoiceWin.exe` from Releases and run it - no installation needed.
+
+## Setup (From Source)
 
 1. Install .NET 8 SDK from https://dotnet.microsoft.com/download/dotnet/8.0
 
 2. Build the project:
 ```bash
-cd F:\specprojects\voicewin
 dotnet restore
-dotnet build
+dotnet build src/VoiceWin -c Release
 ```
 
 3. Run the app:
 ```bash
-dotnet run --project src/VoiceWin
+src\VoiceWin\bin\Release\net8.0-windows\VoiceWin.exe
 ```
 
 4. Configure your API keys in the settings window
@@ -57,6 +62,25 @@ dotnet run --project src/VoiceWin
 
 - **Hold to Record**: Hold the key while speaking, release to transcribe
 - **Tap to Toggle**: Tap once to start, tap again to stop
+- **Hybrid (Hold or Tap)**: Best of both - hold for quick recordings (≥250ms), or tap to toggle for longer sessions
+
+## AI Enhancement
+
+Enable AI Enhancement to automatically polish your transcriptions using Groq's LLM API. The feature:
+
+- Fixes grammar, spelling, and punctuation
+- Removes filler words and stutters
+- Improves sentence structure and clarity
+- Preserves your original meaning and tone
+
+Customize the enhancement prompt in settings to match your preferred output style.
+
+## Settings Location
+
+Settings are stored at:
+```
+%APPDATA%\VoiceWin\settings.json
+```
 
 ## Build for Release
 
@@ -65,3 +89,5 @@ dotnet publish src/VoiceWin -c Release -r win-x64 --self-contained true -p:Publi
 ```
 
 Output will be in `src/VoiceWin/bin/Release/net8.0-windows/win-x64/publish/`
+
+This creates a single portable EXE (~70MB) that runs on any Windows 10/11 x64 machine without requiring .NET installation.
