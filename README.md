@@ -58,6 +58,11 @@ Records audio, then transcribes after you stop. Fast and reliable.
 ### Streaming Mode (Deepgram Streaming)
 Transcribes in real-time as you speak - text appears immediately. Best used with **Toggle** hotkey mode.
 
+> **Note:** Streaming mode adds a trailing space after each transcript chunk to separate words. Some applications (especially terminals, code editors, and certain text fields) may strip trailing whitespace from clipboard paste. If words are running together, try:
+> - Using **Batch Mode** instead (more reliable for these apps)
+> - Adjusting your terminal/editor settings to preserve trailing spaces
+> - Using a different target application
+
 ## AI Enhancement
 
 Enable AI Enhancement to automatically polish your transcriptions using Groq's LLM API:
