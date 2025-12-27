@@ -107,16 +107,26 @@
                            Margin="0,8,0,12"/>
 
                 <ComboBox x:Name="LanguageCombo" Margin="0,0,0,24">
+                    <ComboBoxItem Content="Multilingual (Auto-detect)" Tag="multi"/>
                     <ComboBoxItem Content="English" Tag="en"/>
                     <ComboBoxItem Content="Spanish" Tag="es"/>
                     <ComboBoxItem Content="French" Tag="fr"/>
                     <ComboBoxItem Content="German" Tag="de"/>
                     <ComboBoxItem Content="Italian" Tag="it"/>
                     <ComboBoxItem Content="Portuguese" Tag="pt"/>
+                    <ComboBoxItem Content="Dutch" Tag="nl"/>
+                    <ComboBoxItem Content="Russian" Tag="ru"/>
                     <ComboBoxItem Content="Japanese" Tag="ja"/>
                     <ComboBoxItem Content="Korean" Tag="ko"/>
                     <ComboBoxItem Content="Chinese" Tag="zh"/>
                     <ComboBoxItem Content="Hindi" Tag="hi"/>
+                    <ComboBoxItem Content="Arabic" Tag="ar"/>
+                    <ComboBoxItem Content="Turkish" Tag="tr"/>
+                    <ComboBoxItem Content="Polish" Tag="pl"/>
+                    <ComboBoxItem Content="Ukrainian" Tag="uk"/>
+                    <ComboBoxItem Content="Vietnamese" Tag="vi"/>
+                    <ComboBoxItem Content="Indonesian" Tag="id"/>
+                    <ComboBoxItem Content="Thai" Tag="th"/>
                 </ComboBox>
 
                 <TextBlock Text="AI Enhancement" 

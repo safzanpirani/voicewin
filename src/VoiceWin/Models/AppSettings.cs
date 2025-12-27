@@ -9,7 +9,7 @@ public class AppSettings
     public string DeepgramModel { get; set; } = "nova-3";
     public string HotkeyMode { get; set; } = "hold";
     public int HotkeyVirtualKey { get; set; } = 165;
-    public string Language { get; set; } = "en";
+    public string Language { get; set; } = "multi";
     public bool PlaySoundFeedback { get; set; } = true;
     public bool ShowRecordingOverlay { get; set; } = true;
     public bool StartWithWindows { get; set; } = false;
