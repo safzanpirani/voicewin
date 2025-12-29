@@ -164,12 +164,12 @@ public class TranscriptionOrchestrator : IDisposable
             _audioService.StopRecording();
             await _streamingService.CloseAsync();
             
-            _isStreaming = false;
             RecordingStopped?.Invoke(this, EventArgs.Empty);
         }
         catch { }
         finally
         {
+            _isStreaming = false;
             _isAutoStopping = false;
         }
     }
