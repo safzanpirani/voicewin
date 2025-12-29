@@ -12,6 +12,7 @@ public class AppSettings
     public string Language { get; set; } = "multi";
     public bool PlaySoundFeedback { get; set; } = true;
     public bool ShowRecordingOverlay { get; set; } = true;
+    public string OverlayPosition { get; set; } = "bottom";
     public bool StartWithWindows { get; set; } = false;
     public bool StartMinimized { get; set; } = true;
     

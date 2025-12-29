@@ -100,6 +100,17 @@
                     <ComboBoxItem Content="Hybrid (Hold or Tap)" Tag="hybrid"/>
                 </ComboBox>
 
+                <TextBlock Text="Overlay Position" 
+                           FontSize="16" 
+                           FontWeight="SemiBold" 
+                           Foreground="{StaticResource TextBrush}"
+                           Margin="0,8,0,12"/>
+
+                <ComboBox x:Name="OverlayPositionCombo" Margin="0,0,0,16">
+                    <ComboBoxItem Content="Bottom of Screen" Tag="bottom"/>
+                    <ComboBoxItem Content="Top of Screen" Tag="top"/>
+                </ComboBox>
+
                 <TextBlock Text="Language" 
                            FontSize="16" 
                            FontWeight="SemiBold" 

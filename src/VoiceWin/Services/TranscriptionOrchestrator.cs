@@ -22,6 +22,7 @@ public class TranscriptionOrchestrator : IDisposable
     public event EventHandler? RecordingStopped;
     public event EventHandler<TranscriptionResult>? TranscriptionCompleted;
     public event EventHandler<string>? StatusChanged;
+    public event EventHandler<float>? AudioLevelChanged;
 
     public bool IsRecording => _audioService.IsRecording;
 
@@ -117,6 +118,26 @@ public class TranscriptionOrchestrator : IDisposable
         {
             _streamingService.SendAudio(e.Buffer, e.BytesRecorded);
         }
+
+        float level = CalculateAudioLevel(e.Buffer, e.BytesRecorded);
+        AudioLevelChanged?.Invoke(this, level);
+    }
+
+    private static float CalculateAudioLevel(byte[] buffer, int bytesRecorded)
+    {
+        if (bytesRecorded < 2) return 0;
+
+        long sum = 0;
+        int sampleCount = bytesRecorded / 2;
+
+        for (int i = 0; i < bytesRecorded - 1; i += 2)
+        {
+            short sample = (short)(buffer[i] | (buffer[i + 1] << 8));
+            sum += Math.Abs(sample);
+        }
+
+        float average = sum / (float)sampleCount;
+        return Math.Min(average / 2000f, 1f);
     }
 
     private async void OnStreamingTranscriptReceived(object? sender, string transcript)

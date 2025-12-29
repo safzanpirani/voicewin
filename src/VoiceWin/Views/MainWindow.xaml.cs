@@ -9,12 +9,14 @@ public partial class MainWindow : Window
 {
     private readonly App _app;
     private readonly TrayIconService _trayIconService;
+    private readonly StatusOverlayWindow _statusOverlay;
 
     public MainWindow()
     {
         InitializeComponent();
         _app = (App)Application.Current;
         _trayIconService = new TrayIconService();
+        _statusOverlay = new StatusOverlayWindow();
 
         LoadSettings();
         SubscribeToEvents();
@@ -31,10 +33,13 @@ public partial class MainWindow : Window
 
         SelectComboItemByTag(ProviderCombo, settings.TranscriptionProvider);
         SelectComboItemByTag(HotkeyModeCombo, settings.HotkeyMode);
+        SelectComboItemByTag(OverlayPositionCombo, settings.OverlayPosition);
         SelectComboItemByTag(LanguageCombo, settings.Language);
 
         AiEnhancementCheckBox.IsChecked = settings.AiEnhancementEnabled;
         AiEnhancementPromptBox.Text = settings.AiEnhancementPrompt;
+
+        _statusOverlay.SetPosition(settings.OverlayPosition);
     }
 
     private void SelectComboItemByTag(ComboBox combo, string tag)
@@ -65,6 +70,11 @@ public partial class MainWindow : Window
                 StatusIndicator.Fill = new SolidColorBrush(Color.FromRgb(239, 68, 68));
                 TaskbarIcon.ToolTipText = "VoiceWin - Recording...";
                 TaskbarIcon.IconSource = _trayIconService.CreateIconWithStatus(TrayStatus.Recording);
+                
+                bool isStreaming = _app.SettingsService.Settings.TranscriptionProvider == "deepgram-streaming";
+                _statusOverlay.SetMode(isStreaming);
+                _statusOverlay.UpdateStatus("Recording");
+                _statusOverlay.StartAnimating();
             });
         };
 
@@ -75,6 +85,9 @@ public partial class MainWindow : Window
                 StatusText.Text = "Processing...";
                 StatusIndicator.Fill = new SolidColorBrush(Color.FromRgb(234, 179, 8));
                 TaskbarIcon.IconSource = _trayIconService.CreateIconWithStatus(TrayStatus.Processing);
+                
+                _statusOverlay.StopAnimating();
+                _statusOverlay.UpdateStatus("Processing");
             });
         };
 
@@ -86,6 +99,12 @@ public partial class MainWindow : Window
                 StatusIndicator.Fill = new SolidColorBrush(Color.FromRgb(34, 197, 94));
                 TaskbarIcon.ToolTipText = $"VoiceWin - {status}";
                 TaskbarIcon.IconSource = _trayIconService.CreateIconWithStatus(TrayStatus.Ready);
+                
+                _statusOverlay.UpdateStatus(status);
+                if (IsTerminalStatus(status))
+                {
+                    _statusOverlay.HideOverlay();
+                }
             });
         };
 
@@ -99,6 +118,21 @@ public partial class MainWindow : Window
                 }
             });
         };
+
+        _app.Orchestrator.AudioLevelChanged += (s, level) =>
+        {
+            _statusOverlay.UpdateAudioLevel(level);
+        };
+    }
+
+    private static bool IsTerminalStatus(string status)
+    {
+        return status.Contains("Transcribed") || 
+               status.Contains("Streamed") || 
+               status.Contains("Error") ||
+               status.Contains("too short") ||
+               status.Contains("No API") ||
+               status.Contains("No valid");
     }
 
     private void SaveSettings_Click(object sender, RoutedEventArgs e)
@@ -109,12 +143,14 @@ public partial class MainWindow : Window
             settings.DeepgramApiKey = DeepgramApiKeyBox.Text.Trim();
             settings.TranscriptionProvider = GetSelectedTag(ProviderCombo);
             settings.HotkeyMode = GetSelectedTag(HotkeyModeCombo);
+            settings.OverlayPosition = GetSelectedTag(OverlayPositionCombo);
             settings.Language = GetSelectedTag(LanguageCombo);
             settings.AiEnhancementEnabled = AiEnhancementCheckBox.IsChecked ?? false;
             settings.AiEnhancementPrompt = AiEnhancementPromptBox.Text;
         });
 
         _app.Orchestrator.UpdateHotkeySettings();
+        _statusOverlay.SetPosition(_app.SettingsService.Settings.OverlayPosition);
 
         StatusText.Text = "Settings saved!";
     }
