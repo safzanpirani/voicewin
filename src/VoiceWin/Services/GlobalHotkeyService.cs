@@ -13,6 +13,7 @@ public class GlobalHotkeyService : IDisposable
     public event EventHandler? HotkeyReleased;
     
     public int TargetVirtualKey { get; set; } = 165;
+    public int TargetModifiers { get; set; } = 0;
     public string Mode { get; set; } = "hold";
     
     private bool _toggleState;
@@ -24,6 +25,15 @@ public class GlobalHotkeyService : IDisposable
     private const int WM_KEYUP = 0x0101;
     private const int WM_SYSKEYDOWN = 0x0104;
     private const int WM_SYSKEYUP = 0x0105;
+
+    private const int VK_LCONTROL = 0xA2;
+    private const int VK_RCONTROL = 0xA3;
+    private const int VK_LMENU = 0xA4;
+    private const int VK_RMENU = 0xA5;
+    private const int VK_LSHIFT = 0xA0;
+    private const int VK_RSHIFT = 0xA1;
+    private const int VK_LWIN = 0x5B;
+    private const int VK_RWIN = 0x5C;
 
     private delegate nint LowLevelKeyboardProc(int nCode, nint wParam, nint lParam);
 
@@ -46,7 +56,7 @@ public class GlobalHotkeyService : IDisposable
         {
             int vkCode = Marshal.ReadInt32(lParam);
 
-            if (vkCode == TargetVirtualKey)
+            if (vkCode == TargetVirtualKey && AreModifiersPressed())
             {
                 bool isKeyDownEvent = wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN;
                 bool isKeyUpEvent = wParam == WM_KEYUP || wParam == WM_SYSKEYUP;
@@ -132,4 +142,27 @@ public class GlobalHotkeyService : IDisposable
 
     [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     private static extern nint GetModuleHandle(string lpModuleName);
+
+    [DllImport("user32.dll")]
+    private static extern short GetAsyncKeyState(int vKey);
+
+    private bool AreModifiersPressed()
+    {
+        if (TargetModifiers == 0) return true;
+        
+        bool ctrlRequired = (TargetModifiers & 1) != 0;
+        bool altRequired = (TargetModifiers & 2) != 0;
+        bool shiftRequired = (TargetModifiers & 4) != 0;
+        bool winRequired = (TargetModifiers & 8) != 0;
+
+        bool ctrlPressed = (GetAsyncKeyState(VK_LCONTROL) & 0x8000) != 0 || (GetAsyncKeyState(VK_RCONTROL) & 0x8000) != 0;
+        bool altPressed = (GetAsyncKeyState(VK_LMENU) & 0x8000) != 0 || (GetAsyncKeyState(VK_RMENU) & 0x8000) != 0;
+        bool shiftPressed = (GetAsyncKeyState(VK_LSHIFT) & 0x8000) != 0 || (GetAsyncKeyState(VK_RSHIFT) & 0x8000) != 0;
+        bool winPressed = (GetAsyncKeyState(VK_LWIN) & 0x8000) != 0 || (GetAsyncKeyState(VK_RWIN) & 0x8000) != 0;
+
+        return (!ctrlRequired || ctrlPressed) &&
+               (!altRequired || altPressed) &&
+               (!shiftRequired || shiftPressed) &&
+               (!winRequired || winPressed);
+    }
 }

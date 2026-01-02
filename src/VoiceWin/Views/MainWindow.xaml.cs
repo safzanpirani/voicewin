@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -13,6 +14,7 @@ public partial class MainWindow : Window
     private readonly StatusOverlayWindow _statusOverlay;
     private bool _isRecordingHotkey;
     private int _pendingHotkeyVirtualKey;
+    private int _pendingHotkeyModifiers;
 
     public MainWindow()
     {
@@ -46,7 +48,8 @@ public partial class MainWindow : Window
         VadSilenceTimeoutBox.Text = settings.VadStreamingSilenceTimeoutSeconds.ToString();
 
         _pendingHotkeyVirtualKey = settings.HotkeyVirtualKey;
-        HotkeyDisplayBox.Text = GetKeyName(settings.HotkeyVirtualKey);
+        _pendingHotkeyModifiers = settings.HotkeyModifiers;
+        HotkeyDisplayBox.Text = GetHotkeyDisplayString(_pendingHotkeyModifiers, _pendingHotkeyVirtualKey);
 
         _statusOverlay.SetPosition(settings.OverlayPosition);
     }
@@ -172,6 +175,7 @@ public partial class MainWindow : Window
                 settings.VadStreamingSilenceTimeoutSeconds = timeout;
             }
             settings.HotkeyVirtualKey = _pendingHotkeyVirtualKey;
+            settings.HotkeyModifiers = _pendingHotkeyModifiers;
         });
 
         _app.Orchestrator.UpdateHotkeySettings();
@@ -220,15 +224,18 @@ public partial class MainWindow : Window
         {
             _isRecordingHotkey = false;
             RecordHotkeyButton.Content = "Record";
-            HotkeyDisplayBox.Text = GetKeyName(_pendingHotkeyVirtualKey);
+            HotkeyDisplayBox.Text = GetHotkeyDisplayString(_pendingHotkeyModifiers, _pendingHotkeyVirtualKey);
             return;
         }
 
         _isRecordingHotkey = true;
         RecordHotkeyButton.Content = "Cancel";
-        HotkeyDisplayBox.Text = "Press any key...";
+        HotkeyDisplayBox.Text = "Press key combo...";
         HotkeyDisplayBox.Focus();
     }
+
+    [DllImport("user32.dll")]
+    private static extern short GetAsyncKeyState(int vKey);
 
     protected override void OnPreviewKeyDown(KeyEventArgs e)
     {
@@ -238,14 +245,72 @@ public partial class MainWindow : Window
 
         e.Handled = true;
 
-        int vkCode = KeyInterop.VirtualKeyFromKey(e.Key == Key.System ? e.SystemKey : e.Key);
+        var key = e.Key == Key.System ? e.SystemKey : e.Key;
+        int vkCode = KeyInterop.VirtualKeyFromKey(key);
         
         if (vkCode == 0) return;
 
+        bool isModifier = IsModifierKey(vkCode);
+        
+        int modifiers = 0;
+        if ((GetAsyncKeyState(0xA2) & 0x8000) != 0 || (GetAsyncKeyState(0xA3) & 0x8000) != 0) modifiers |= 1;
+        if ((GetAsyncKeyState(0xA4) & 0x8000) != 0 || (GetAsyncKeyState(0xA5) & 0x8000) != 0) modifiers |= 2;
+        if ((GetAsyncKeyState(0xA0) & 0x8000) != 0 || (GetAsyncKeyState(0xA1) & 0x8000) != 0) modifiers |= 4;
+        if ((GetAsyncKeyState(0x5B) & 0x8000) != 0 || (GetAsyncKeyState(0x5C) & 0x8000) != 0) modifiers |= 8;
+
+        if (isModifier)
+        {
+            HotkeyDisplayBox.Text = GetModifierString(modifiers) + "...";
+            return;
+        }
+
+        _pendingHotkeyModifiers = modifiers;
         _pendingHotkeyVirtualKey = vkCode;
-        HotkeyDisplayBox.Text = GetKeyName(vkCode);
+        HotkeyDisplayBox.Text = GetHotkeyDisplayString(modifiers, vkCode);
         _isRecordingHotkey = false;
         RecordHotkeyButton.Content = "Record";
+    }
+
+    protected override void OnPreviewKeyUp(KeyEventArgs e)
+    {
+        base.OnPreviewKeyUp(e);
+
+        if (!_isRecordingHotkey) return;
+
+        var key = e.Key == Key.System ? e.SystemKey : e.Key;
+        int vkCode = KeyInterop.VirtualKeyFromKey(key);
+        
+        if (IsModifierKey(vkCode) && _pendingHotkeyModifiers == 0)
+        {
+            _pendingHotkeyVirtualKey = vkCode;
+            _pendingHotkeyModifiers = 0;
+            HotkeyDisplayBox.Text = GetKeyName(vkCode);
+            _isRecordingHotkey = false;
+            RecordHotkeyButton.Content = "Record";
+            e.Handled = true;
+        }
+    }
+
+    private static bool IsModifierKey(int vkCode)
+    {
+        return vkCode is 160 or 161 or 162 or 163 or 164 or 165 or 91 or 92 or 16 or 17 or 18;
+    }
+
+    private static string GetModifierString(int modifiers)
+    {
+        var parts = new List<string>();
+        if ((modifiers & 1) != 0) parts.Add("Ctrl");
+        if ((modifiers & 2) != 0) parts.Add("Alt");
+        if ((modifiers & 4) != 0) parts.Add("Shift");
+        if ((modifiers & 8) != 0) parts.Add("Win");
+        return parts.Count > 0 ? string.Join(" + ", parts) : "";
+    }
+
+    private static string GetHotkeyDisplayString(int modifiers, int virtualKey)
+    {
+        var modStr = GetModifierString(modifiers);
+        var keyStr = GetKeyName(virtualKey);
+        return string.IsNullOrEmpty(modStr) ? keyStr : $"{modStr} + {keyStr}";
     }
 
     private static string GetKeyName(int virtualKey)
